@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeBuddy Hero Redesign - Live Code Canvas</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-dark: #080B11;
+            --primary-green: #00FF9D;
+            --text-light: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --card-bg: rgba(255, 255, 255, 0.02);
+            --card-border: rgba(255, 255, 255, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* Hero Container Section Wrapper */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 4%;
+            overflow: hidden;
+        }
+
+        /* Continuous Interactive Square Matrix Background Canvas */
+        #codeMatrixCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .hero-container {
+            max-width: 840px; /* Constrained width for clean centered reading line-length */
+            width: 100%;
+            text-align: center; /* Centers the content inline items */
+            z-index: 2; /* Ensures content stays completely legible on top */
+        }
+
+        /* Centered Column Text Content */
+        .hero-content {
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Formats flex layout items dead-center */
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--primary-green);
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(8px);
+        }
+
+        .hero-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(36px, 5vw, 64px); /* Slightly bumped desktop scale for center balance */
+            line-height: 1.15;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #fff 40%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .dynamic-wrapper {
+            display: block;
+            color: var(--primary-green);
+            height: 1.25em;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .dynamic-txt {
+            position: absolute;
+            left: 0;
+            right: 0;
+            margin: 0 auto; /* Ensures text loops perfectly within center bound metrics */
+            opacity: 0;
+            transform: translateY(30px);
+            animation: rotateText 9s infinite ease-in-out;
+        }
+
+        .dynamic-txt:nth-child(1) { animation-delay: 0s; }
+        .dynamic-txt:nth-child(2) { animation-delay: 3s; }
+        .dynamic-txt:nth-child(3) { animation-delay: 6s; }
+
+        @keyframes rotateText {
+            0% { opacity: 0; transform: translateY(30px); }
+            5% { opacity: 1; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(0); }
+            35% { opacity: 0; transform: translateY(-30px); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        .hero-description {
+            font-size: clamp(16px, 1.3vw, 20px);
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            max-width: 680px; /* Limits prose width so strings don't stretch indefinitely */
+        }
+
+        .cta-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center; /* Centers action points natively */
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 157, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255,255,255,0.01);
+            color: var(--text-light);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--card-bg);
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero-section" id="hero-interactive-zone">
+        <canvas id="codeMatrixCanvas"></canvas>
+
+        <div class="hero-container">
+            
+            <div class="hero-content">
+                <div class="hero-pill">Breaking Down Barriers to Software Development</div>
+                <h1 class="hero-title">
+                    <span class="text-gradient">You have the expertise.</span>
+                    <span class="dynamic-wrapper">
+                        <span class="dynamic-txt">Build Custom Apps.</span>
+                        <span class="dynamic-txt">Automate Workflows.</span>
+                        <span class="dynamic-txt">Scale Operations.</span>
+                    </span>
+                </h1>
+                <p class="hero-description">
+                    We provide the blank canvas, development tools, and professional software engineers. Make your custom platforms faster, more reliable, and less expensive to own.
+                </p>
+                <div class="cta-group">
+                    <a href="#" class="btn btn-primary">Schedule a Call</a>
+                    <a href="#" class="btn btn-secondary">Explore the Studio</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        const canvas = document.getElementById('codeMatrixCanvas');
+        const ctx = canvas.getContext('2d');
+        const interactiveZone = document.getElementById('hero-interactive-zone');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        let mouse = { x: null, y: null, radius: 180 };
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        interactiveZone.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        interactiveZone.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        // Ambient Low Light Square Particle Architecture
+        class SquareNode {
+            constructor() {
+                this.reset();
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+            }
+
+            reset() {
+                this.size = 10 + Math.random() * 40; // Balanced low-profile sizes
+                this.x = Math.random() * width;
+                this.y = height + this.size + Math.random() * 50; // Fluidly float in from base
+                this.speedY = -(0.2 + Math.random() * 0.5); // Calm drifting pace
+                this.speedX = (Math.random() - 0.5) * 0.15;
+                this.angle = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.005; // Slow ambient spinning
+                this.alpha = 0.02 + Math.random() * 0.12; // Strictly muted, low light emission
+                
+                // Mix subtle brand green accents with minimalist pure white geometries
+                this.color = Math.random() > 0.3 ? '0, 255, 157' : '255, 255, 255';
+                this.isFilled = Math.random() > 0.7; // Outline focused look with rare filled variants
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.angle += this.rotationSpeed;
+
+                // Seamless magnetic mouse deflection
+                if (mouse.x !== null && mouse.y !== null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        this.x -= (dx / distance) * force * 1.5;
+                        this.y -= (dy / distance) * force * 0.5;
+                    }
+                }
+
+                // Recycle out of boundary nodes
+                if (this.y < -this.size || this.x < -this.size || this.x > width + this.size) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                
+                if (this.isFilled) {
+                    ctx.fillStyle = `rgba(${this.color}, ${this.alpha})`;
+                    ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                } else {
+                    ctx.strokeStyle = `rgba(${this.color}, ${this.alpha * 1.2})`;
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                }
+                
+                ctx.restore();
+            }
+        }
+
+        const squareCount = 45; // Keeping density clean to minimize visual clutter
+        const squares = [];
+
+        for (let i = 0; i < squareCount; i++) {
+            squares.push(new SquareNode());
+        }
+
+        // Production loop handler
+        function runSquareAnimation() {
+            // Generates a soft, trailing visual wash to blend geometric shifts perfectly
+            ctx.fillStyle = 'rgba(8, 11, 17, 0.08)'; 
+            ctx.fillRect(0, 0, width, height);
+
+            for (let i = 0; i < squares.length; i++) {
+                squares[i].update();
+                squares[i].draw();
+            }
+
+            requestAnimationFrame(runSquareAnimation);
+        }
+
+        runSquareAnimation();
+    </script>
+</body>
+</html>
